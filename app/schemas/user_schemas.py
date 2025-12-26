@@ -9,7 +9,7 @@ class UserRegisterRequest(BaseModel):
     user: UserRegister
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class UserLoginRequest(BaseModel):
@@ -17,7 +17,7 @@ class UserLoginRequest(BaseModel):
 
 class UserDetail(BaseModel):
     bio: str | None = ""
-    email: EmailStr
+    email: str
     image: str | None = ""
     token: str
     username:str
@@ -26,10 +26,10 @@ class UserResponse(BaseModel):
     user:UserDetail
 
 class UpdateCurrentUserRequest(BaseModel):
-    bio: str
-    email: EmailStr
-    image: str
-    username: str
+    bio: str | None = None
+    email: str | None = None
+    image: str | None = None
+    username: str | None = None
 
 
 
