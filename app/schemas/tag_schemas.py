@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
-class TagsResponse(BaseModel):
+class Tags(BaseModel):
     tags: list[str]

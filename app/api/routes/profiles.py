@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from app.schemas.profiles_shcemas import ProfileResponse
 from app.repositories.user_repo import get_by_username
 from app.api.deps import get_db, require_user
-
+from app.repositories.follow_repo import follow, unfollow
+from app.presenters.profile_presenter import to_profile_detail
 
 router = APIRouter()
 
@@ -27,4 +28,20 @@ def get_a_profile(username: str, db: Session = Depends(get_db)):
 
 @router.put("/profiles/{username}/follow", response_model=ProfileResponse)
 def follow_user(username: str, db: Session = Depends(get_db), current=Depends(require_user)):
-    return
+    me, token = current
+    target = get_by_username(db, username)
+    if not target:
+        raise HTTPException(status_code=422, detail={"errors": {"username": ["is invalid"]}})
+
+    follow(db, me.id, target.id)
+    return to_profile_detail(target, following=True)
+
+@router.delete("/profiles/{username}/follow", response_model=ProfileResponse)
+def unfollow_user(username: str, db: Session = Depends(get_db), current=Depends(require_user)):
+    me, token = current
+    target = get_by_username(db, username)
+    if not target:
+        raise HTTPException(status_code=422, detail={"errors": {"username": ["is invalid"]}})
+
+    unfollow(db, me.id, target.id)
+    return to_profile_detail(target, following=False)
