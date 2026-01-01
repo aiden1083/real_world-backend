@@ -16,7 +16,7 @@ class ArticleOutput(BaseModel):
     createdAt: datetime
     updateAt: datetime
     favorited: bool
-    favoriteCounts: int
+    favoritesCount: int
     author: Profile
 
 class ArticleResponse(BaseModel):
@@ -31,5 +31,15 @@ class ArticleInput(BaseModel):
 class ArticleRequest(BaseModel):
     article: ArticleInput
 
+class UpdateArticle(BaseModel):
+    title: str
+    description: str
+    body: str
 
+class UpdateRequest(BaseModel):
+    article: UpdateArticle
+
+class ArticlesList(BaseModel):
+    articles: list[ArticleOutput]
+    articlesCount: int
 

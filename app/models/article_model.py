@@ -1,16 +1,28 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from datetime import datetime, timezone
 from sqlalchemy import ForeignKey, Table, Column, Integer, String, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+if TYPE_CHECKING:
+    from .user_model import User
+    from .tag_model import Tag
+
 from app.db.base import Base
 
-article_tags = Table(
+articles_tags = Table(
     "articles_tags",
     Base.metadata,
     Column("article_id", ForeignKey("articles.id", ondelete="CASCADE"), primary_key=True),
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
 )
 
+users_articles = Table(
+    "users_articles",
+    Base.metadata,
+    Column("user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("article_id", ForeignKey("articles.id", ondelete="CASCADE"), primary_key=True)
+)
 
 class Article(Base):
     __tablename__ = "articles"
@@ -26,6 +38,6 @@ class Article(Base):
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
-    author = relationship("User", lazy="joined")
-    tags = relationship("Tag", secondary=article_tags, lazy="selectin")
+    author: Mapped["User"] = relationship("User", lazy="joined")
+    tags = relationship("Tag", secondary=articles_tags, lazy="selectin")
 

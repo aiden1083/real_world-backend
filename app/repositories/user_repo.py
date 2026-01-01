@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+
 from app.models.user_model import User
 
 '''secondary key look-up'''
 def get_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(User.email == email))
 
-'''primary key look-up is easier'''
+'''primary key look-up'''
 def get_by_id(db: Session, user_id: int) -> User | None:
     return db.get(User, user_id)
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import re
 import secrets
 from datetime import datetime, timezone
@@ -7,6 +9,11 @@ from sqlalchemy.orm import Session
 
 from app.models.article_model import Article
 from app.models.tag_model import Tag
+from app.schemas.articles_schemas import UpdateArticle
+from app.repositories.article_repo import get_article_by_slug
+
+if TYPE_CHECKING:
+    from app.models.user_model import User
 
 def _slugify(title: str) -> str:
     s = title.strip().lower()
@@ -20,7 +27,7 @@ def _unique_slug(db: Session, title: str) -> str:
         slug = f"{base}--{secrets.token_hex(3)}"
     return slug
 
-def create_article(db: Session, author_id: int, title: str, description: str, body: str, tag_list: list[str]) -> Article:
+def create_article_service(db: Session, author_id: int, title: str, description: str, body: str, tag_list: list[str]) -> Article:
     slug = _unique_slug(db, title)
 
     article = Article(
@@ -29,8 +36,8 @@ def create_article(db: Session, author_id: int, title: str, description: str, bo
         description=description,
         body=body,
         author_id=author_id,
-        create_at=datetime.now(timezone.utc),
-        update_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
 
     tags: list[Tag] = []
@@ -53,4 +60,40 @@ def create_article(db: Session, author_id: int, title: str, description: str, bo
     db.refresh(article)
     return article
 
+def update_article_service(db: Session,
+                   user_id: int,
+                   slug: str,
+                   patch: UpdateArticle):
+    article = get_article_by_slug(db, slug)
 
+    if not article:
+        raise HTTPException(status_code=422, detail="")
+
+    if article.author_id != user_id:
+        raise HTTPException(status_code=422, detail="")
+
+    if patch.title is not None:
+        article.title = patch.title
+        article.slug = _unique_slug(db, patch.title)
+
+    if patch.description is not None:
+        article.description = patch.description
+
+    if patch.body is not None:
+        article.body = patch.body
+
+    db.commit()
+    db.refresh(article)
+    return article
+
+def delete_article_service(db: Session, slug: str, user_id: int):
+    article1 = get_article_by_slug(db, slug)
+
+    if not article1:
+        raise HTTPException(status_code=422, detail="no such an article")
+
+    if article1.author_id != user_id:
+        raise HTTPException(status_code=422, detail="user is not author")
+
+    db.delete(article1)
+    db.commit()
