@@ -1,7 +1,12 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from .article_model import Article
 
 class User(Base):
     __tablename__: str = "users"
@@ -13,3 +18,9 @@ class User(Base):
     bio: Mapped[str] = mapped_column(String(1000), default="", nullable=False)
     image: Mapped[str] = mapped_column(String(1000), default="", nullable=False)
 
+    favorites: Mapped[list["Article"]] = relationship(
+        "Article",
+        secondary="users_articles",
+        back_populates="favorited_by",
+        lazy="selectin"
+    )

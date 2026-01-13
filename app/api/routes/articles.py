@@ -6,7 +6,8 @@ from app.api.deps import require_user
 from app.schemas.articles_schemas import ArticleRequest, ArticleResponse, UpdateRequest, ArticlesList
 from app.service.article_service import create_article_service, update_article_service, delete_article_service
 from app.presenters.article_presenter import to_article_detail
-from app.repositories.article_repo import get_article_by_slug
+from app.repositories.article_repo import get_article_by_slug, favorite, unfavorite, favorites_count
+from app.repositories.follow_repo import is_following
 
 router = APIRouter()
 
@@ -50,6 +51,40 @@ def delete_article(
         current = Depends(require_user)
 ):
     user, token = current
-    user_id = user.id
 
-    delete_article_service(db, slug, user_id)
+    delete_article_service(db, slug, user.id)
+
+@router.post("/article/{slug}/favorite",response_model=ArticleResponse, status_code=status.HTTP_200_OK)
+def favorite_article(
+        slug: str,
+        db: Session = Depends(get_db),
+        current = Depends(require_user)
+):
+    user, token= current
+    article1 = get_article_by_slug(db, slug)
+
+    if not article1:
+        raise HTTPException(status_code=422, detail="article not found")
+
+    favorite(db, user.id, article1.id)
+
+    count = favorites_count(db, article1.id)
+    following = is_following(db,user.id, article1.author_id)
+    return to_article_detail(article1, following=following, favorited=True, favorites_count=count)
+
+@router.delete("/articles/{slug}/favorite")
+def unfavorite_article(
+        slug: str,
+        db: Session = Depends(get_db),
+        current = Depends(require_user)
+):
+    user, token = current
+    article1 = get_article_by_slug(db, slug)
+
+    if not article1:
+        raise HTTPException(status_code=422, detail="article not found")
+
+    unfavorite(db, user.id, article1.id)
+    count = favorites_count(db, article1.id)
+    following = is_following(db, user.id, article1.author_id)
+    return to_article_detail(article1, following=following, favorited=True, favorites_count=count)

@@ -1,7 +1,7 @@
 from app.schemas.articles_schemas import ArticleResponse, ArticleOutput, Profile, ArticlesList
 from app.models.article_model import Article
 
-def to_article_detail(article: Article, following: bool = False) -> ArticleResponse:
+def to_article_detail(article: Article, following: bool, favorited: bool, favorites_count: int) -> ArticleResponse:
     return ArticleResponse(
         article=ArticleOutput(
             slug=article.slug,
@@ -11,8 +11,8 @@ def to_article_detail(article: Article, following: bool = False) -> ArticleRespo
             tags=[t.name for t in article.tags],
             createdAt=article.created_at,
             updateAt=article.updated_at,
-            favorited=False,
-            favoritesCount=0,
+            favorited=favorited,
+            favoritesCount=favorites_count,
             author=Profile(
                 bio=article.author.bio,
                 image=article.author.image,

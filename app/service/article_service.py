@@ -27,7 +27,12 @@ def _unique_slug(db: Session, title: str) -> str:
         slug = f"{base}--{secrets.token_hex(3)}"
     return slug
 
-def create_article_service(db: Session, author_id: int, title: str, description: str, body: str, tag_list: list[str]) -> Article:
+def create_article_service(db: Session,
+                           author_id: int,
+                           title: str,
+                           description: str,
+                           body: str,
+                           tag_list: list[str]) -> Article:
     slug = _unique_slug(db, title)
 
     article = Article(
@@ -97,3 +102,6 @@ def delete_article_service(db: Session, slug: str, user_id: int):
 
     db.delete(article1)
     db.commit()
+
+
+

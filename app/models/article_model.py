@@ -39,5 +39,12 @@ class Article(Base):
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
     author: Mapped["User"] = relationship("User", lazy="joined")
-    tags = relationship("Tag", secondary=articles_tags, lazy="selectin")
+    tags: Mapped["Tag"] = relationship("Tag", secondary=articles_tags, lazy="selectin")
+    favorited_by: Mapped[list["User"]] = relationship(
+        "User",
+        secondary=users_articles,
+        back_populates="favorites",
+        lazy="selectin"
+    )
+
 

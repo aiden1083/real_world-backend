@@ -1,11 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
+from .profiles_shcemas import Profile
 
-class Profile(BaseModel):
-    bio: str
-    image: str
-    username: str
-    following: bool
 
 class ArticleOutput(BaseModel):
     slug: str
